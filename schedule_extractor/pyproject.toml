@@ -1,0 +1,16 @@
+[project]
+name = "schedule-extractor"
+version = "0.1.0"
+description = "Extract specific divs from PyCon India 2025 schedule HTML"
+requires-python = ">=3.8"
+dependencies = [
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
