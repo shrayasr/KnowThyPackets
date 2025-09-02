@@ -6,8 +6,31 @@ A fun way to query conference schedule using DNS!
 import json
 from datetime import datetime, timedelta
 from scapy.all import bind_layers, DNS, DNSQR, DNSRR, UDP, IP, send, sniff, IPv6, fragment
+import unicodedata
 
 net_interface = "lo"
+
+def clean_txt(txt):
+    """
+    Convert fancy Unicode characters to ASCII-safe equivalents
+    for DNS TXT records so dig doesn't show escaped octets.
+    """
+    replacements = {
+        "–": "-",   # en dash
+        "—": "-",   # em dash
+        "“": '"',   # left double quote
+        "”": '"',   # right double quote
+        "‘": "'",   # left single quote
+        "’": "'",   # right single quote
+    }
+
+    for k, v in replacements.items():
+        txt = txt.replace(k, v)
+
+    # also normalize to NFKD to strip other weird chars
+    txt = unicodedata.normalize("NFKD", txt)
+
+    return txt.encode("ascii", "ignore").decode("ascii")
 
 
 
@@ -47,7 +70,7 @@ class PyConDNSDemo:
             end_str = end_dt.strftime("%H:%M")
 
             speakers = ", ".join(t.get("persons", [])) or "TBA"
-            line = f'{t["track"]} | {start_str}–{end_str} | {t["title"]} — {speakers}'
+            line = f'{t["track"]} | {start_str}-{end_str} | {t["title"]} - {speakers}'
             txt_records.append(line)
         return txt_records
 
@@ -192,8 +215,9 @@ class PyConDNSDemo:
             
         for txt in txt_records:
             # Split long strings >255 bytes into multiple chunks for DNS TXT
+            safe_txt = clean_txt(txt)
             chunks = []
-            encoded = txt.encode("utf-8")
+            encoded = safe_txt.encode("utf-8")
             while encoded:
                 chunks.append(encoded[:255].decode("utf-8", errors="ignore"))
                 encoded = encoded[255:]
@@ -201,9 +225,10 @@ class PyConDNSDemo:
             txt_rrs.append(DNSRR(rrname=qname, type="TXT", ttl=60, rdata=chunks if len(chunks) > 1 else chunks[0]))
 
         # Combine all TXT RRs into the answer section
- #       an_section = b"".join(bytes(rr) for rr in txt_rrs)
-
-
+        #       an_section = b"".join(bytes(rr) for rr in txt_rrs)
+        #print(txt_rrs)
+#        debug_raw_text(chunks)
+ 
         dns= DNS(
             id=query_packet[DNS].id,
             qr=1,  # response
