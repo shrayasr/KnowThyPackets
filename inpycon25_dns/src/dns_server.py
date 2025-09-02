@@ -12,10 +12,11 @@ net_interface = "lo"
 
 
 class PyConDNSDemo:
-    def __init__(self, port = 3333, schedule_file='schedule.json'):
+    def __init__(self, port = 53, schedule_file='schedule.json', now_str = "2025-09-13T10:10:00+05:30"):
         """Load schedule and prepare for queries"""
         self.schedule = self.load_schedule(schedule_file)
         self.port = port  # Non-privileged port for demo
+        self.now_str = now_str
         bind_layers(UDP, DNS, dport=self.port)
         bind_layers(UDP, DNS, sport=self.port)
     def load_schedule(self, file_path):
@@ -123,7 +124,8 @@ class PyConDNSDemo:
         earliest_start = min(start for start, _, _ in upcoming)
 
         # Collect all talks starting at that exact time
-        result = {track: talks[talk_id] for start, track, talk_id in upcoming if start == earliest_start}
+        #result = {track: talks[talk_id] for start, track, talk_id in upcoming if start == earliest_start}
+        result = [talks[talk_id] for start, track, talk_id in upcoming if start == earliest_start]
         return result
 
     
@@ -149,9 +151,9 @@ class PyConDNSDemo:
             print(query)
             # Simple query routing
             if 'now.talks' in query:
-                answers = self.get_current_talks()
+                answers = self.get_current_talks(self.now_str)
             elif 'next.talks' in query:
-                answers = [self.get_next_talks()]
+                answers = self.get_next_talks(self.now_str)
             elif 'track1.talks' in query:
 #                print(query)
                 answers = self.get_track_talks("Track 1")
