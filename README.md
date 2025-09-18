@@ -9,6 +9,20 @@ This repository contains the assets for the PyCon India talk that [Rengaraj](htt
 - `packets`
   - Contains the packet captures
  
+## Demo
+
+### Talks happening now 
+
+![](https://github.com/shrayasr/KnowThyPackets/blob/master/asciinema/now.gif)
+
+### Talks happening next
+
+![](https://github.com/shrayasr/KnowThyPackets/blob/master/asciinema/next.gif)
+
+### Talks happening in a track
+
+![](https://github.com/shrayasr/KnowThyPackets/blob/master/asciinema/track1.gif)
+ 
 ## Credits 
 
 - [DNS Toys](https://github.com/knadh/dns.toys)
